@@ -1,7 +1,7 @@
-import 'package:chat_app_ai/chat_ai_cubit/chat_cubit.dart';
-import 'package:chat_app_ai/widgets/build_input_area.dart';
-import 'package:chat_app_ai/widgets/build_suggested_questions.dart';
-import 'package:chat_app_ai/widgets/custom_message_widget.dart';
+import 'package:chat_app_ai/features/home/chat_ai_cubit/chat_cubit.dart';
+import 'package:chat_app_ai/features/home/views/widgets/build_input_area.dart';
+import 'package:chat_app_ai/features/home/views/widgets/build_suggested_questions.dart';
+import 'package:chat_app_ai/features/home/views/widgets/custom_message_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

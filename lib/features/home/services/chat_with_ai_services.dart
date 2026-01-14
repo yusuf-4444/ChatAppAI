@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:chat_app_ai/utils/app_constants.dart';
+import 'package:chat_app_ai/core/utils/app_constants.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 class ChatWithAiServices {
