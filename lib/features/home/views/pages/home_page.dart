@@ -1,6 +1,7 @@
 import 'package:chat_app_ai/features/home/chat_ai_cubit/chat_cubit.dart';
 import 'package:chat_app_ai/features/home/views/widgets/build_input_area.dart';
 import 'package:chat_app_ai/features/home/views/widgets/build_suggested_questions.dart';
+import 'package:chat_app_ai/features/home/views/widgets/chat_drawer_widget.dart';
 import 'package:chat_app_ai/features/home/views/widgets/custom_message_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -41,10 +42,22 @@ class _HomePageState extends State<HomePage> {
     final cubit = BlocProvider.of<ChatCubit>(context);
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Colors.white,
+      drawer: const ChatDrawer(),
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         elevation: 0,
         backgroundColor: Colors.white,
+        leading: Builder(
+          builder: (context) {
+            return IconButton(
+              icon: Icon(Icons.menu, color: Colors.grey.shade700),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+            );
+          },
+        ),
         title: Row(
           children: [
             Container(
@@ -85,16 +98,26 @@ class _HomePageState extends State<HomePage> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.more_vert, color: Colors.grey.shade700),
-            onPressed: () {},
+            icon: Icon(Icons.add_circle_outline, color: Colors.blue.shade600),
+            onPressed: () {
+              cubit.createNewChat();
+            },
+            tooltip: 'New Chat',
           ),
         ],
       ),
       body: BlocBuilder<ChatCubit, ChatState>(
         bloc: cubit,
         buildWhen: (previous, current) =>
-            current is MessageSent || current is MessageError,
+            current is MessageSent ||
+            current is MessageError ||
+            current is LoadingChat ||
+            current is ChatInitial,
         builder: (context, state) {
+          if (state is LoadingChat) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
           if (state is MessageError) {
             return Center(
               child: RefreshIndicator(
@@ -102,30 +125,44 @@ class _HomePageState extends State<HomePage> {
                   cubit.startChattingSession();
                   return Future.value();
                 },
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: ListView(
+                  physics: const BouncingScrollPhysics(),
                   children: [
-                    Text(
-                      'Something went wrong',
-                      style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    Text(
-                      "limit reached!, please try again later.",
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        color: Colors.red,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    SizedBox(height: 200.h),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 64.sp,
+                          color: Colors.red.shade400,
+                        ),
+                        SizedBox(height: 16.h),
+                        Text(
+                          'Something went wrong',
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
+                        Text(
+                          state.message,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: Colors.grey.shade600,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
             );
           }
+
           if (state is MessageSent) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               _scrollToBottom();
@@ -135,6 +172,7 @@ class _HomePageState extends State<HomePage> {
               children: [
                 Expanded(
                   child: ListView.builder(
+                    physics: const BouncingScrollPhysics(),
                     controller: _scrollController,
                     padding: EdgeInsets.symmetric(vertical: 12.h),
                     itemCount: state.message.length,
@@ -151,7 +189,6 @@ class _HomePageState extends State<HomePage> {
                     },
                   ),
                 ),
-
                 BuildInputArea(
                   cubit: cubit,
                   textController: textController,
@@ -213,7 +250,6 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
-
               BuildInputArea(
                 cubit: cubit,
                 textController: textController,

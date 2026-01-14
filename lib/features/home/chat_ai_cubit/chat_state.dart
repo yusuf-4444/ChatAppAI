@@ -1,3 +1,5 @@
+// lib/features/home/chat_ai_cubit/chat_state.dart
+
 part of 'chat_cubit.dart';
 
 class ChatState {}
@@ -22,3 +24,10 @@ final class ImagePicked extends ChatState {
 }
 
 final class ImageCleared extends ChatState {}
+
+final class LoadingChat extends ChatState {}
+
+final class ChatsHistoryLoaded extends ChatState {
+  final List<ChatHistory> chats;
+  ChatsHistoryLoaded(this.chats);
+}

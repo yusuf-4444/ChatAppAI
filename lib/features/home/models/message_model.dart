@@ -1,3 +1,5 @@
+// lib/features/home/models/message_model.dart
+
 import 'dart:io';
 
 class MessageModel {
@@ -27,7 +29,7 @@ class MessageModel {
       'message': message,
       'isUser': isUser,
       'time': time.millisecondsSinceEpoch,
-      'image': image,
+      'imagePath': image?.path,
     };
   }
 
@@ -36,7 +38,7 @@ class MessageModel {
       message: map['message'] as String,
       isUser: map['isUser'] as bool,
       time: DateTime.fromMillisecondsSinceEpoch(map['time'] as int),
-      image: map['image'] as File?,
+      image: null,
     );
   }
 }
