@@ -105,7 +105,8 @@ class _CustomMessageWidgetState extends State<CustomMessageWidget> {
                           ],
                         )
                       : AnimatedTextKit(
-                          totalRepeatCount: 1,
+                          stopPauseOnTap: true,
+                          totalRepeatCount: 0,
                           repeatForever: false,
                           isRepeatingAnimation: false,
                           onTap: null,

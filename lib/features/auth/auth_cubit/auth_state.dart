@@ -32,3 +32,17 @@ final class UserDataLoaded extends AuthState {
 final class UserNotLoggedIn extends AuthState {}
 
 final class UserLoggedIn extends AuthState {}
+
+final class GoogleLoginLoading extends AuthState {}
+
+final class GoogleLoginError extends AuthState {
+  final String message;
+  GoogleLoginError(this.message);
+}
+
+final class GoogleRegisterLoading extends AuthState {}
+
+final class GoogleRegisterError extends AuthState {
+  final String message;
+  GoogleRegisterError(this.message);
+}

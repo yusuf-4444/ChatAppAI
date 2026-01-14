@@ -61,16 +61,37 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> loginWithGoogle() async {
     try {
-      emit(AuthLoading());
+      emit(GoogleLoginLoading());
+      emit(GoogleRegisterLoading());
       final result = await _firebaseAuth.authenticateWithGoogle();
       if (result) {
-        await loadUserData();
+        final currentUser = _firebaseAuth.getCurrentUser();
+        if (currentUser != null) {
+          try {
+            await loadUserData();
+          } catch (e) {
+            final userData = UserDataModel(
+              id: currentUser.uid,
+              userName: currentUser.displayName ?? 'User',
+              email: currentUser.email ?? '',
+              createdAt: DateTime.now().toIso8601String(),
+            );
+
+            await _firestoreServices.setData(
+              path: ApiPath.user(currentUser.uid),
+              data: userData.toMap(),
+            );
+
+            currentUserData = userData;
+          }
+        }
         emit(AuthSuccess());
       } else {
-        emit(AuthError("Login failed"));
+        emit(GoogleRegisterError("Register failed"));
       }
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(GoogleLoginError(e.toString()));
+      emit(GoogleRegisterError(e.toString()));
     }
   }
 

@@ -20,68 +20,82 @@ class _ChatDrawerState extends State<ChatDrawer> {
   @override
   void initState() {
     super.initState();
-    _loadChats();
+    _loadData();
   }
 
-  Future<void> _loadChats() async {
+  Future<void> _loadData() async {
     final chatCubit = context.read<ChatCubit>();
+    final authCubit = context.read<AuthCubit>();
+
+    if (authCubit.currentUserData == null) {
+      await authCubit.loadUserData();
+    }
+
     final loadedChats = await chatCubit.loadChatsHistory();
-    setState(() {
-      chats = loadedChats;
-    });
+    if (mounted) {
+      setState(() {
+        chats = loadedChats;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final chatCubit = context.read<ChatCubit>();
     final authCubit = context.read<AuthCubit>();
-    final userName = authCubit.currentUserData?.userName ?? 'User';
 
     return Drawer(
       backgroundColor: Colors.white,
       child: Column(
         children: [
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(20.w),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.blue.shade600, Colors.blue.shade400],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Gap(20.h),
-                CircleAvatar(
-                  radius: 30.r,
-                  backgroundColor: Colors.white,
-                  child: Icon(
-                    Icons.person,
-                    size: 35.sp,
-                    color: Colors.blue.shade600,
+          BlocBuilder<AuthCubit, AuthState>(
+            builder: (context, state) {
+              final userName = authCubit.currentUserData?.userName ?? 'User';
+              final email = authCubit.currentUserData?.email ?? '';
+
+              return Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(20.w),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blue.shade600, Colors.blue.shade400],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
                 ),
-                SizedBox(height: 12.h),
-                Text(
-                  userName,
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Gap(20.h),
+                    CircleAvatar(
+                      radius: 30.r,
+                      backgroundColor: Colors.white,
+                      child: Icon(
+                        Icons.person,
+                        size: 35.sp,
+                        color: Colors.blue.shade600,
+                      ),
+                    ),
+                    SizedBox(height: 12.h),
+                    Text(
+                      userName,
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      email,
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  authCubit.currentUserData?.email ?? '',
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    color: Colors.white.withOpacity(0.9),
-                  ),
-                ),
-              ],
-            ),
+              );
+            },
           ),
 
           // New Chat Button

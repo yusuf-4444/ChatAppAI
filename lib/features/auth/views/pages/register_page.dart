@@ -161,7 +161,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 SizedBox(height: 20.h),
 
-                // Password Field
                 Text(
                   'Password',
                   style: TextStyle(
@@ -218,67 +217,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
 
                 SizedBox(height: 20.h),
-
-                // Confirm Password Field
-                Text(
-                  'Confirm Password',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(16.r),
-                    border: Border.all(color: Colors.grey.shade200),
-                  ),
-                  child: TextFormField(
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please confirm your password';
-                      }
-                      return null;
-                    },
-                    controller: confirmPasswordController,
-                    obscureText: !isConfirmPasswordVisible,
-                    decoration: InputDecoration(
-                      hintText: 'Confirm your password',
-                      hintStyle: TextStyle(color: Colors.grey.shade400),
-                      prefixIcon: Icon(
-                        Icons.lock_outline,
-                        color: Colors.grey.shade600,
-                        size: 20.sp,
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          isConfirmPasswordVisible
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                          color: Colors.grey.shade600,
-                          size: 20.sp,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            isConfirmPasswordVisible =
-                                !isConfirmPasswordVisible;
-                          });
-                        },
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 16.w,
-                        vertical: 16.h,
-                      ),
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: 20.h),
-
-                // Terms and Conditions
                 Row(
                   children: [
                     SizedBox(
@@ -309,9 +247,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           ),
                           GestureDetector(
-                            onTap: () {
-                              // TODO: Show terms and conditions
-                            },
+                            onTap: () {},
                             child: Text(
                               'Terms & Conditions',
                               style: TextStyle(
@@ -429,44 +365,87 @@ class _RegisterPageState extends State<RegisterPage> {
                 SizedBox(height: 24.h),
 
                 // Google Sign Up Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 56.h,
-                  child: OutlinedButton(
-                    onPressed: () {},
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: Colors.grey.shade300),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16.r),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset(
-                          'assets/google_logo.png', // Add Google logo to assets
-                          height: 24.h,
-                          width: 24.w,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Icon(
-                              Icons.g_mobiledata,
-                              size: 32.sp,
-                              color: Colors.blue.shade600,
-                            );
-                          },
+                BlocConsumer<AuthCubit, AuthState>(
+                  listenWhen: (previous, current) =>
+                      current is GoogleRegisterError || current is AuthSuccess,
+                  listener: (context, state) {
+                    if (state is GoogleRegisterError) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Registered Cancelled"),
+                          backgroundColor: Colors.red,
                         ),
-                        SizedBox(width: 12.w),
-                        Text(
-                          'Sign up with Google',
-                          style: TextStyle(
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
+                      );
+                    } else if (state is AuthSuccess) {
+                      Navigator.pushReplacementNamed(context, AppRoutes.chat);
+                    }
+                  },
+                  bloc: BlocProvider.of<AuthCubit>(context),
+                  buildWhen: (previous, current) =>
+                      current is GoogleRegisterLoading ||
+                      current is AuthSuccess ||
+                      current is GoogleRegisterError,
+                  builder: (context, state) {
+                    if (state is GoogleRegisterLoading) {
+                      return SizedBox(
+                        width: double.infinity,
+                        height: 56.h,
+                        child: OutlinedButton(
+                          onPressed: null,
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: Colors.grey.shade300),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16.r),
+                            ),
+                          ),
+                          child: CircularProgressIndicator(
+                            color: Colors.blue.shade600,
                           ),
                         ),
-                      ],
-                    ),
-                  ),
+                      );
+                    }
+                    return SizedBox(
+                      width: double.infinity,
+                      height: 56.h,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          BlocProvider.of<AuthCubit>(context).loginWithGoogle();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: Colors.grey.shade300),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16.r),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              'assets/google_logo.png',
+                              height: 24.h,
+                              width: 24.w,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Icon(
+                                  Icons.g_mobiledata,
+                                  size: 32.sp,
+                                  color: Colors.blue.shade600,
+                                );
+                              },
+                            ),
+                            SizedBox(width: 12.w),
+                            Text(
+                              'Sign up with Google',
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
 
                 SizedBox(height: 32.h),
